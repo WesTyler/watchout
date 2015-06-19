@@ -22,20 +22,47 @@ for(var i=0; i<10; i++) {
   });
 }
 
+function shurikenPoints(n, r, R) {
+  var outputArray = [];
+  var cx = 20;
+  var cy = 20;
 
-d3.select('svg').selectAll('circle').data(enemyData)
+  for (var i=0; i<n; i++) {
+    outputArray.push(cx + r*Math.cos(Math.PI/2 + Math.PI*2/n*i));
+    outputArray.push(cy + r*Math.sin(Math.PI/2 + Math.PI*2/n*i));
+    outputArray.push(cx + R*Math.cos(Math.PI/2 + Math.PI*2/n*i));
+    outputArray.push(cy + R*Math.sin(Math.PI/2 + Math.PI*2/n*i));
+  }
+
+  return outputArray.join(" ");
+}
+
+d3.select('svg').selectAll('.shuriken').data(enemyData)
   .enter()
-  .append('circle')
+  .append('g')
   .attr('class', 'enemy')
-  .attr('cx', function(d) {return d.x})
-  .attr('cy', function(d) {return d.y})
-  .attr('r', function(d) {return d.r});
+  .append('polygon')
+  .attr('points', shurikenPoints(5, 6, 18))
+
+d3.selectAll('g').append('circle')
+  .attr('cx', 20)
+  .attr('cy', 20)
+  .attr('r', 3)
+  .attr('fill', 'blue')
+
+d3.selectAll('g')
+  .attr('transform', function(d){
+    return 'translate('+d.x+', '+d.y+')'
+  })
 
 function moveEnemies() {
   d3.selectAll('.enemy')
     .transition().duration(900)
-    .attr('cx', function(d) {d.x = 30 + 440*Math.random(); return d.x})
-    .attr('cy', function(d) {d.y = 30 + 440*Math.random(); return d.y});
+    .attr('transform', function(d){
+      d.x = 30 + 440*Math.random();
+      d.y = 30 + 440*Math.random();
+      return 'translate('+d.x+', '+d.y+')'
+    });
 }
 setInterval(moveEnemies, 1000);
 
@@ -90,5 +117,5 @@ function findCollisions() {
     .data([canvasData.highScore, canvasData.currentScore])
     .text(function(d) {return d})
 }
-setInterval(findCollisions, 100);
+//setInterval(findCollisions, 100);
 
