@@ -34,6 +34,14 @@ d3.select('svg').selectAll('circle').data(enemyData)
 function moveEnemies() {
   d3.selectAll('.enemy')
     .transition().duration(900)
+    // .tween('cx', function() {
+    //   var currentX = d.x;
+    //   var currentY = d.y;
+    //   var newX = 30 + 440*Math.random();
+    //   var newY = 30 + 440*Math.random();
+    //   var interpolatorX = d3.interpolateNumber(currentX, newX);
+    //   var interpolatorY = d3.interpolateNumber(currentY, newY);
+    // });
     .attr('cx', function(d) {d.x = 30 + 440*Math.random(); return d.x})
     .attr('cy', function(d) {d.y = 30 + 440*Math.random(); return d.y});
 }
