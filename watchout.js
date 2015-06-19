@@ -1,6 +1,13 @@
+var canvasData = {
+  height: 500,
+  width: 500,
+  currentScore: 0,
+  highScore: 0
+}
+
 d3.select('body').append('svg')
-  .attr('height', '500px')
-  .attr('width', '500px')
+  .attr('height', canvasData.height + 'px')
+  .attr('width', canvasData.width + 'px')
   .append('rect')
   .attr('height', '100%')
   .attr('width', '100%')
@@ -28,9 +35,10 @@ function moveEnemies() {
   d3.selectAll('.enemy')
     .transition().duration(900)
     .attr('cx', function(d) {d.x = 30 + 440*Math.random(); return d.x})
-    .attr('cy', function(d) {d.y = 30 + 440*Math.random(); return d.y})
-
+    .attr('cy', function(d) {d.y = 30 + 440*Math.random(); return d.y});
 }
+setInterval(moveEnemies, 1000);
+
 
 var playerData = {
   x : 30 + 440*Math.random(),
@@ -38,13 +46,45 @@ var playerData = {
   r : 15
 };
 
-d3.select('svg').selectAll('player').data([playerData])
+var player = d3.select('svg').selectAll('player').data([playerData])
   .enter()
   .append('circle')
   .attr('class', 'player')
   .attr('cx', function(d) {return d.x})
   .attr('cy', function(d) {return d.y})
   .attr('r', function(d) {return d.r})
-  .attr('fill', 'green')
-setInterval(moveEnemies, 1000);
+  .attr('fill', 'green');
+
+var drag = d3.behavior.drag()
+  .origin(function(d) {return d;})
+  .on("drag", dragmove);
+
+function dragmove(d) {
+  d3.select(this)
+    .attr("cx", d.x = Math.max(d.r, Math.min(canvasData.width - d.r, d3.event.x)))
+    .attr("cy", d.y = Math.max(d.r, Math.min(canvasData.height - d.r, d3.event.y)));
+
+}
+
+player.call(drag);
+
+function findCollisions() {
+  //check if there is an enemy within a collision radius of the current position (d.x, d.y)
+  var foundCollision = false;
+  enemyData.forEach(function(enemy) {
+    var dx = enemy.x - playerData.x;
+    var dy = enemy.y - playerData.y;
+    var dist = Math.sqrt(dx*dx + dy*dy);
+    if(dist < enemy.r + playerData.r) {
+      canvasData.currentScore = 0;
+      foundCollision = true;
+    }
+  });
+
+  if(!foundCollision) {
+    canvasData.currentScore += 1;
+    canvasData.highScore = Math.max(canvasData.currentScore, canvasData.highScore);
+  }
+}
+setInterval(findCollisions, 100);
 
