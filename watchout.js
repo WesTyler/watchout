@@ -85,6 +85,10 @@ function findCollisions() {
     canvasData.currentScore += 1;
     canvasData.highScore = Math.max(canvasData.currentScore, canvasData.highScore);
   }
+
+  d3.select(".scoreboard").selectAll("div span")
+    .data([canvasData.highScore, canvasData.currentScore])
+    .text(function(d) {return d})
 }
 setInterval(findCollisions, 100);
 
