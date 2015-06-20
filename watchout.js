@@ -1,3 +1,4 @@
+//Set the game parameters.
 var canvasData = {
   height: 650,
   width: 650,
@@ -11,6 +12,7 @@ var canvasData = {
 var randEnemyX = function() {return (canvasData.width-40)*Math.random()}
 var randEnemyY = function() {return (canvasData.height-40)*Math.random()}
 
+//Create the game board with a background
 d3.select('.gameboard').append('svg')
   .attr('height', canvasData.height + 'px')
   .attr('width', canvasData.width + 'px')
@@ -19,6 +21,7 @@ d3.select('.gameboard').append('svg')
   .attr('width', '100%')
   .attr('fill', 'grey');
 
+//Create data to be used for placing enemies
 var enemyData = [];
 for(var i=0; i<canvasData.n; i++) {
   enemyData.push({
@@ -28,66 +31,62 @@ for(var i=0; i<canvasData.n; i++) {
     ang : 360*Math.random()
   });
 }
-
+//Define enemy shapes
 function shurikenPoints(n, r, R) {
   var outputArray = [];
   var cx = 20;
   var cy = 20;
-
   for (var i=0; i<n; i++) {
     outputArray.push(cx + r*Math.cos(Math.PI/2 + Math.PI*2/n*i));
     outputArray.push(cy + r*Math.sin(Math.PI/2 + Math.PI*2/n*i));
     outputArray.push(cx + R*Math.cos(Math.PI/2 + Math.PI*2/n*i));
     outputArray.push(cy + R*Math.sin(Math.PI/2 + Math.PI*2/n*i));
   }
-
   return outputArray.join(" ");
 }
-
+//Create and place enemies
 d3.select('svg').selectAll('.shuriken').data(enemyData)
   .enter()
   .append('g')
   .attr('class', 'enemy')
   .attr('r', 20)
   .append('polygon')
-  .attr('points', shurikenPoints(6, 6, 18))
-
+  .attr('points', shurikenPoints(6, 6, 18));
 d3.selectAll('g').append('circle')
   .attr('cx', 20)
   .attr('cy', 20)
   .attr('r', 3)
-  .attr('fill', 'grey')
-
+  .attr('fill', 'grey');
 d3.selectAll('g').append('circle')
   .attr('cx', 20)
   .attr('cy', 20)
   .attr('r', 18)
   .attr('stroke', 'black')
-  .attr('fill-opacity', 0)
-
+  .attr('fill-opacity', 0);
 d3.selectAll('g')
   .attr('transform', function(d){
     return 'translate('+d.x+', '+d.y+')'
-  })
-
-function moveEnemies() {
-  d3.selectAll('.enemy')
-    .transition().duration(1000)
+  });
+//Define and begin enemy movement
+function moveEnemies(element) {
+  element.transition().duration(1000)
     .attr('transform', function(d){
       d.x = randEnemyX();
       d.y = randEnemyY();
       return 'translate('+d.x+', '+d.y+')'
+    })
+    .each('end', function() {
+      moveEnemies(d3.select(this));
     });
 }
-setInterval(moveEnemies, 1000);
+moveEnemies(d3.select('svg').selectAll('.enemy'));
 
-
+//Create and place player
 var playerData = {
   x : canvasData.playerR + (canvasData.width - 2*canvasData.playerR)*Math.random(),
   y : canvasData.playerR + (canvasData.height - 2*canvasData.playerR)*Math.random(),
   r : canvasData.playerR
 };
-
 var player = d3.select('svg').selectAll('player').data([playerData])
   .enter()
   .append('circle')
@@ -97,21 +96,19 @@ var player = d3.select('svg').selectAll('player').data([playerData])
   .attr('r', function(d) {return d.r})
   .attr('fill', 'white');
 
+//Define player dragging movement and behavior
 var drag = d3.behavior.drag()
   .origin(function(d) {return d;})
   .on("drag", dragmove);
-
 function dragmove(d) {
   d3.select(this)
     .attr("cx", d.x = Math.max(d.r, Math.min(canvasData.width - d.r, d3.event.x)))
     .attr("cy", d.y = Math.max(d.r, Math.min(canvasData.height - d.r, d3.event.y)));
-
 }
-
 player.call(drag);
 
+//Define collision detection
 function findCollisions() {
-  //check if there is an enemy within a collision radius of the current position (d.x, d.y)
   var foundCollision = false;
   d3.selectAll(".enemy").each(function() {
     var me = d3.select(this);
@@ -131,18 +128,20 @@ function findCollisions() {
       }, 1000);
     }
   });
+}
+d3.timer(findCollisions);
 
-  if(!foundCollision) {
-    canvasData.currentScore += 1*canvasData.collectCount;
-    canvasData.highScore = Math.max(canvasData.currentScore, canvasData.highScore);
-  }
-
+//Keep score
+function checkScore() {
+  canvasData.currentScore += canvasData.collectCount;
+  canvasData.highScore = Math.max(canvasData.currentScore, canvasData.highScore);
   d3.select(".scoreboard").selectAll("div span")
     .data([canvasData.highScore, canvasData.currentScore, canvasData.collectCount])
     .text(function(d) {return d})
 }
-setInterval(findCollisions, 16);
+setInterval(checkScore, 100);
 
+//Create and place score multiplying-collectors
 var collectorData = [];
 for (var j=0; j<5; j++) {
   var radius = 1 + 5*Math.random();
@@ -154,7 +153,6 @@ for (var j=0; j<5; j++) {
     r: radius
   });
 }
-
 d3.select('svg').selectAll('collectors').data(collectorData)
   .enter()
   .append('circle')
@@ -163,7 +161,7 @@ d3.select('svg').selectAll('collectors').data(collectorData)
   .attr('cy', function(d){return d.y})
   .attr('r', function(d){return d.r})
   .attr('fill', 'yellow')
-
+//Define collision behavior for score-multiplying collectors
 function collectTheThings () {
   d3.selectAll('.collector').each(function(){
     var thisOne = d3.select(this)
@@ -180,4 +178,4 @@ function collectTheThings () {
 
   })
 }
-setInterval(collectTheThings, 16);
+d3.timer(collectTheThings);
