@@ -34,14 +34,6 @@ d3.select('svg').selectAll('circle').data(enemyData)
 function moveEnemies() {
   d3.selectAll('.enemy')
     .transition().duration(900)
-    // .tween('cx', function() {
-    //   var currentX = d.x;
-    //   var currentY = d.y;
-    //   var newX = 30 + 440*Math.random();
-    //   var newY = 30 + 440*Math.random();
-    //   var interpolatorX = d3.interpolateNumber(currentX, newX);
-    //   var interpolatorY = d3.interpolateNumber(currentY, newY);
-    // });
     .attr('cx', function(d) {d.x = 30 + 440*Math.random(); return d.x})
     .attr('cy', function(d) {d.y = 30 + 440*Math.random(); return d.y});
 }
@@ -79,13 +71,18 @@ player.call(drag);
 function findCollisions() {
   //check if there is an enemy within a collision radius of the current position (d.x, d.y)
   var foundCollision = false;
-  enemyData.forEach(function(enemy) {
-    var dx = enemy.x - playerData.x;
-    var dy = enemy.y - playerData.y;
+  d3.selectAll(".enemy").each(function() {
+    var me = d3.select(this);
+    var dx = me.attr("cx") - playerData.x;
+    var dy = me.attr("cy") - playerData.y;
     var dist = Math.sqrt(dx*dx + dy*dy);
-    if(dist < enemy.r + playerData.r) {
+    if(dist < +me.attr("r") + playerData.r) {
       canvasData.currentScore = 0;
       foundCollision = true;
+      me.attr("fill","yellow");
+      setTimeout(function() {
+        me.attr("fill", "black");
+      }, 1000);
     }
   });
 
@@ -98,5 +95,5 @@ function findCollisions() {
     .data([canvasData.highScore, canvasData.currentScore])
     .text(function(d) {return d})
 }
-setInterval(findCollisions, 100);
+setInterval(findCollisions, 35);
 
