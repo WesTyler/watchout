@@ -2,10 +2,14 @@ var canvasData = {
   height: 650,
   width: 650,
   currentScore: 0,
-  highScore: 0, 
+  highScore: 0,
   collectCount: 1,
-  n: 50
+  n: 15,
+  playerR: 15
 }
+
+var randEnemyX = function() {return (canvasData.width-40)*Math.random()}
+var randEnemyY = function() {return (canvasData.height-40)*Math.random()}
 
 d3.select('.gameboard').append('svg')
   .attr('height', canvasData.height + 'px')
@@ -18,8 +22,8 @@ d3.select('.gameboard').append('svg')
 var enemyData = [];
 for(var i=0; i<canvasData.n; i++) {
   enemyData.push({
-    x : canvasData.width*Math.random(),
-    y : canvasData.width*Math.random(),
+    x : randEnemyX(),
+    y : randEnemyY(),
     r : 20,
     ang : 360*Math.random()
   });
@@ -70,8 +74,8 @@ function moveEnemies() {
   d3.selectAll('.enemy')
     .transition().duration(1000)
     .attr('transform', function(d){
-      d.x = Math.min((10 + canvasData.width*Math.random()), (canvasData.width*Math.random() - 5));
-      d.y = 1 + canvasData.height*Math.random();
+      d.x = randEnemyX();
+      d.y = randEnemyY();
       return 'translate('+d.x+', '+d.y+')'
     });
 }
@@ -79,9 +83,9 @@ setInterval(moveEnemies, 1000);
 
 
 var playerData = {
-  x : 30 + 440*Math.random(),
-  y : 30 + 440*Math.random(),
-  r : 15
+  x : canvasData.playerR + (canvasData.width - 2*canvasData.playerR)*Math.random(),
+  y : canvasData.playerR + (canvasData.height - 2*canvasData.playerR)*Math.random(),
+  r : canvasData.playerR
 };
 
 var player = d3.select('svg').selectAll('player').data([playerData])
@@ -117,7 +121,6 @@ function findCollisions() {
     var dx = x - playerData.x;
     var dy = y - playerData.y;
     var dist = Math.sqrt(dx*dx + dy*dy);
-    //debugger;
     if(dist < +me.attr("r") + playerData.r) {
       canvasData.currentScore = 0;
       canvasData.collectCount = 1;
@@ -138,7 +141,7 @@ function findCollisions() {
     .data([canvasData.highScore, canvasData.currentScore, canvasData.collectCount])
     .text(function(d) {return d})
 }
-setInterval(findCollisions, 10);
+setInterval(findCollisions, 16);
 
 var collectorData = [];
 for (var j=0; j<5; j++) {
@@ -146,9 +149,9 @@ for (var j=0; j<5; j++) {
   var radiusPlace = radius;
   if (Math.random() > 0.5) {radiusPlace = 0-radius;}
   collectorData.push({
-  x: 350 + radiusPlace*50*Math.random(),
-  y: 350 + radiusPlace*50*Math.random(),
-  r: radius
+    x: canvasData.width/2 + radiusPlace*50*Math.random(),
+    y: canvasData.height/2 + radiusPlace*50*Math.random(),
+    r: radius
   });
 }
 
@@ -172,9 +175,9 @@ function collectTheThings () {
     var dist = Math.sqrt(dx*dx + dy*dy);
     if (dist < points + playerData.r) {
       canvasData.collectCount += (6 -points);
-      thisOne.data([]).exit().remove()
+      thisOne.remove()
     }
 
   })
 }
-setInterval(collectTheThings, 10);
+setInterval(collectTheThings, 16);
