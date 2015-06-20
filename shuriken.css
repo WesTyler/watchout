@@ -1,6 +1,7 @@
-.shuriken {
+polygon {
+  top: 200px;
   animation: spin 1000ms infinite linear;
-  transform-origin: 50% 50%;
+  transform-origin: center;
 }
 
 @keyframes spin {

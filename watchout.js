@@ -18,7 +18,8 @@ for(var i=0; i<10; i++) {
   enemyData.push({
     x : 30 + 440*Math.random(),
     y : 30 + 440*Math.random(),
-    r : 20
+    r : 20,
+    ang : 360*Math.random()
   });
 }
 
@@ -41,8 +42,9 @@ d3.select('svg').selectAll('.shuriken').data(enemyData)
   .enter()
   .append('g')
   .attr('class', 'enemy')
+  .attr('r', 20)
   .append('polygon')
-  .attr('points', shurikenPoints(5, 6, 18))
+  .attr('points', shurikenPoints(6, 6, 18))
 
 d3.selectAll('g').append('circle')
   .attr('cx', 20)
@@ -57,7 +59,7 @@ d3.selectAll('g')
 
 function moveEnemies() {
   d3.selectAll('.enemy')
-    .transition().duration(900)
+    .transition().duration(1000)
     .attr('transform', function(d){
       d.x = 30 + 440*Math.random();
       d.y = 30 + 440*Math.random();
@@ -98,13 +100,22 @@ player.call(drag);
 function findCollisions() {
   //check if there is an enemy within a collision radius of the current position (d.x, d.y)
   var foundCollision = false;
-  enemyData.forEach(function(enemy) {
-    var dx = enemy.x - playerData.x;
-    var dy = enemy.y - playerData.y;
+  d3.selectAll(".enemy").each(function() {
+    var me = d3.select(this);
+    var t = me.attr('transform');
+    var x = +t.substr(t.indexOf('(')+1, t.indexOf(',')-t.indexOf('(')-1);
+    var y = +t.substring(t.indexOf(",")+2, t.length - 1);
+
+    var dx = x - playerData.x;
+    var dy = y - playerData.y;
     var dist = Math.sqrt(dx*dx + dy*dy);
-    if(dist < enemy.r + playerData.r) {
+    if(dist < +me.attr("r") + playerData.r) {
       canvasData.currentScore = 0;
       foundCollision = true;
+      me.attr("fill","yellow");
+      setTimeout(function() {
+        me.attr("fill", "black");
+      }, 1000);
     }
   });
 
@@ -117,5 +128,4 @@ function findCollisions() {
     .data([canvasData.highScore, canvasData.currentScore])
     .text(function(d) {return d})
 }
-//setInterval(findCollisions, 100);
-
+setInterval(findCollisions, 35);
