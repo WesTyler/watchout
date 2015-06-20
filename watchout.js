@@ -52,6 +52,13 @@ d3.selectAll('g').append('circle')
   .attr('r', 3)
   .attr('fill', 'blue')
 
+d3.selectAll('g').append('circle')
+  .attr('cx', 20)
+  .attr('cy', 20)
+  .attr('r', 18)
+  .attr('stroke', 'black')
+  .attr('fill-opacity', 0)
+
 d3.selectAll('g')
   .attr('transform', function(d){
     return 'translate('+d.x+', '+d.y+')'
@@ -61,8 +68,8 @@ function moveEnemies() {
   d3.selectAll('.enemy')
     .transition().duration(1000)
     .attr('transform', function(d){
-      d.x = 30 + 440*Math.random();
-      d.y = 30 + 440*Math.random();
+      d.x = 5 + 440*Math.random();
+      d.y = 5 + 440*Math.random();
       return 'translate('+d.x+', '+d.y+')'
     });
 }
@@ -82,7 +89,7 @@ var player = d3.select('svg').selectAll('player').data([playerData])
   .attr('cx', function(d) {return d.x})
   .attr('cy', function(d) {return d.y})
   .attr('r', function(d) {return d.r})
-  .attr('fill', 'green');
+  .attr('fill', 'white');
 
 var drag = d3.behavior.drag()
   .origin(function(d) {return d;})
@@ -112,7 +119,7 @@ function findCollisions() {
     if(dist < +me.attr("r") + playerData.r) {
       canvasData.currentScore = 0;
       foundCollision = true;
-      me.attr("fill","yellow");
+      me.attr("fill","red");
       setTimeout(function() {
         me.attr("fill", "black");
       }, 1000);
@@ -128,4 +135,4 @@ function findCollisions() {
     .data([canvasData.highScore, canvasData.currentScore])
     .text(function(d) {return d})
 }
-setInterval(findCollisions, 35);
+setInterval(findCollisions, 10);
