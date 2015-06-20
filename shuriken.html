@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html>
   <head>
-    <link rel='stylesheet' type='css' href='styles.css'>
+    <link rel='stylesheet' type='css' href='shuriken.css'>
     <script src="d3.js" charset="utf-8"></script>
   </head>
   <body>
@@ -22,10 +22,10 @@
         return outputArray.join(" ");
       };
 
-      var shuriken = d3.select('svg').append("g");
+      var shuriken = d3.select('svg').append("g").attr("class","shuriken");
 
       shuriken.append('polygon')
-        .attr('points', shurikenPoints(5, 6, 18));
+        .attr('points', shurikenPoints(6, 6, 18));
 
       shuriken.append('circle')
         .attr('cx', 20)
