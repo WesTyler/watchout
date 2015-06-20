@@ -103,12 +103,12 @@ function findCollisions() {
   d3.selectAll(".enemy").each(function() {
     var me = d3.select(this);
     var t = me.attr('transform');
-    var x = +t.substr(t.indexOf('(')+1, t.indexOf(',')-t.indexOf('(')-1);
-    var y = +t.substring(t.indexOf(",")+2, t.length - 1);
-
+    var x = +t.substr(t.indexOf('(')+1, t.indexOf(',')-t.indexOf('(')-1) + 20;
+    var y = +t.substring(t.indexOf(",")+1, t.length - 1) + 20;
     var dx = x - playerData.x;
     var dy = y - playerData.y;
     var dist = Math.sqrt(dx*dx + dy*dy);
+    //debugger;
     if(dist < +me.attr("r") + playerData.r) {
       canvasData.currentScore = 0;
       foundCollision = true;
