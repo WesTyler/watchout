@@ -1,3 +1,14 @@
+
+.scoreboard, .instructions {
+  width: 650px;
+  background-color: #666666;
+  font-family: sans-serif;
+  color: white;
+  text-align: center; 
+  float: none;
+}
+
+
 polygon {
   top: 200px;
   animation: spin 1000ms infinite linear;

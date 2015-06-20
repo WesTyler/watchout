@@ -1,23 +1,25 @@
 var canvasData = {
-  height: 500,
-  width: 500,
+  height: 650,
+  width: 650,
   currentScore: 0,
-  highScore: 0
+  highScore: 0, 
+  collectCount: 1,
+  n: 50
 }
 
-d3.select('body').append('svg')
+d3.select('.gameboard').append('svg')
   .attr('height', canvasData.height + 'px')
   .attr('width', canvasData.width + 'px')
   .append('rect')
   .attr('height', '100%')
   .attr('width', '100%')
-  .attr('fill', 'blue');
+  .attr('fill', 'grey');
 
 var enemyData = [];
-for(var i=0; i<10; i++) {
+for(var i=0; i<canvasData.n; i++) {
   enemyData.push({
-    x : 30 + 440*Math.random(),
-    y : 30 + 440*Math.random(),
+    x : canvasData.width*Math.random(),
+    y : canvasData.width*Math.random(),
     r : 20,
     ang : 360*Math.random()
   });
@@ -50,7 +52,7 @@ d3.selectAll('g').append('circle')
   .attr('cx', 20)
   .attr('cy', 20)
   .attr('r', 3)
-  .attr('fill', 'blue')
+  .attr('fill', 'grey')
 
 d3.selectAll('g').append('circle')
   .attr('cx', 20)
@@ -68,8 +70,8 @@ function moveEnemies() {
   d3.selectAll('.enemy')
     .transition().duration(1000)
     .attr('transform', function(d){
-      d.x = 5 + 440*Math.random();
-      d.y = 5 + 440*Math.random();
+      d.x = Math.min((10 + canvasData.width*Math.random()), (canvasData.width*Math.random() - 5));
+      d.y = 1 + canvasData.height*Math.random();
       return 'translate('+d.x+', '+d.y+')'
     });
 }
@@ -118,6 +120,7 @@ function findCollisions() {
     //debugger;
     if(dist < +me.attr("r") + playerData.r) {
       canvasData.currentScore = 0;
+      canvasData.collectCount = 1;
       foundCollision = true;
       me.attr("fill","red");
       setTimeout(function() {
@@ -127,13 +130,51 @@ function findCollisions() {
   });
 
   if(!foundCollision) {
-    canvasData.currentScore += 1;
+    canvasData.currentScore += 1*canvasData.collectCount;
     canvasData.highScore = Math.max(canvasData.currentScore, canvasData.highScore);
   }
 
   d3.select(".scoreboard").selectAll("div span")
-    .data([canvasData.highScore, canvasData.currentScore])
+    .data([canvasData.highScore, canvasData.currentScore, canvasData.collectCount])
     .text(function(d) {return d})
 }
 setInterval(findCollisions, 10);
 
+var collectorData = [];
+for (var j=0; j<5; j++) {
+  var radius = 1 + 5*Math.random();
+  var radiusPlace = radius;
+  if (Math.random() > 0.5) {radiusPlace = 0-radius;}
+  collectorData.push({
+  x: 350 + radiusPlace*50*Math.random(),
+  y: 350 + radiusPlace*50*Math.random(),
+  r: radius
+  });
+}
+
+d3.select('svg').selectAll('collectors').data(collectorData)
+  .enter()
+  .append('circle')
+  .attr('class', 'collector')
+  .attr('cx', function(d){return d.x})
+  .attr('cy', function(d){return d.y})
+  .attr('r', function(d){return d.r})
+  .attr('fill', 'yellow')
+
+function collectTheThings () {
+  d3.selectAll('.collector').each(function(){
+    var thisOne = d3.select(this)
+    var x = +thisOne.attr('cx');
+    var y = +thisOne.attr('cy');
+    var points = Math.floor(+thisOne.attr('r'));
+    var dx = x - playerData.x;
+    var dy = y - playerData.y;
+    var dist = Math.sqrt(dx*dx + dy*dy);
+    if (dist < points + playerData.r) {
+      canvasData.collectCount += (6 -points);
+      thisOne.data([]).exit().remove()
+    }
+
+  })
+}
+setInterval(collectTheThings, 10);
